@@ -12,6 +12,6 @@
 3. Submit
 
 #### TODO:
-[] ASR/Diarization for timestamps => reduced sliding window
-[] Overlap stress test and translation test => Anime subbing
-[] Realtime ASR
+- [] ASR/Diarization for timestamps => reduced sliding window
+- [] Overlap stress test and translation test => Anime subbing
+- [] Realtime ASR
