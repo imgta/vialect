@@ -1,9 +1,10 @@
+# API KEYS
 .streamlit/secrets.toml
-app/sidebar/
 
 # ENVIRONMENTS
 .venv
 .devcontainer
 
+# FILE EXTRACTIONS, TESTING
 data
 workshop
