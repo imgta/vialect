@@ -1,8 +1,8 @@
-.streamlit/*
-extracts/
+.streamlit/secrets.toml
 
 # ENVIRONMENTS
 .venv
 .devcontainer
 
-data/*
+data
+workshop
