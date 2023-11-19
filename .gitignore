@@ -1,0 +1,8 @@
+.streamlit/*
+extracts/
+
+# ENVIRONMENTS
+.venv
+.devcontainer
+
+data/*
