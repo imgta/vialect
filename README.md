@@ -1,4 +1,5 @@
-<!-- TODOS -->
+## 👾V/A.Lect: Traversing digital oceans, for treasures unseen.
+
 #### SETUP:
 1. `pip install -r requirements.txt`
 2. Obtain [huggingface token](https://huggingface.co/pyannote/speaker-diarization)
@@ -6,7 +7,7 @@
 4. `streamlit run app/Home.py`
 
 #### USAGE:
-1. Select whisper model
+1. Select whisper model and options
 2. Input or upload video/audio file
 3. Submit
 
