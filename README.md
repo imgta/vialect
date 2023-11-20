@@ -4,7 +4,7 @@
 
 > _**Traversing digital oceans, for treasures unseen.**_
 
-**Vialect** *transforms audio into workable text (e.g. generate summaries from video links).*
+**Vialect** *transforms video/audio into workable text (e.g. generate summaries from video links).*
 
 **Pipelines:**  [Pyannote Audio](https://github.com/pyannote/pyannote-audio), [OpenAI Whisper](https://github.com/openai/whisper), [YoutubeDL](https://github.com/yt-dlp/yt-dlp)
 
