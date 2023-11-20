@@ -11,6 +11,7 @@ def whisper_map(model: str, use_english: bool) -> str:
 def update_display():
     global display_models
     display_models = [f"{model}{'.en' if st.session_state.english else ''} ({vram})" for model, vram in zip(models, vrams)]
+    return display_models
 
 def toggle_en():
     st.session_state.english = not st.session_state.english

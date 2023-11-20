@@ -61,7 +61,6 @@ st.markdown("""
 # t0.subheader(body="👾 V/A.Lect: Traverse digital oceans for treasures unseen.", divider=None, anchor=False)
 # top.divider()
 
-# h0 = row([1.65, 1.22, 1, 0.85], vertical_align="top")
 h0 = row([5], vertical_align="top")
 d0, d1, d2, d3 = h0.columns([1.65, 1.22, 1, 0.85])
 
@@ -74,10 +73,9 @@ h1 = row([5], vertical_align="bottom")
 c0, c1, c2, c3 = h1.columns([4.1, 0.25, 1.4, 2.5])
 h2 = row([1, 4], vertical_align="top")
 
-update_display()
 whisper_model = c0.selectbox(
     label="Whisper model :gray[(req. VRAM)]:",
-    options=display_models,
+    options=update_display(),
     key="w_model",
     on_change=model_switch,
     help="Smaller models are faster, but larger models offer more accuracy.",
@@ -237,7 +235,6 @@ if st.session_state.url_btn or st.session_state.upload_btn:
                         st.caption(f"{log}\n")
                 with g2.expander(label=f"Full Transcript [{select_model}]:"):
                     st.text_area(label=" ", value=transcript['text'].strip(), height=250)
-                st.session_state.url_btn, st.session_state.upload_btn = False, False
                 with st.expander(label="Summary:"):
                     prompt_text = transcript['text'].strip()
                     st.text_area(label="", value=summarize(prompt_text), height=250)
