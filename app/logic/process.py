@@ -5,19 +5,21 @@ from logic.utils import format_timestamp
 
 save_path = ".\\data\\media"
 
-def sanitize_name(filename, max_length=200):
-    sanitized = ''.join('_' if not char.isalnum() else char for char in filename)
+"""[SANITIZE DIRECTORY NAME] -> Replace all non-alphanumeric characters with _,  limit character length."""
+def sanitize_name(title, max_length=200):
+    sanitized = ''.join('_' if not char.isalnum() else char for char in title)
     if len(sanitized) > max_length:
         sanitized = sanitized[:max_length]
     return sanitized
 
+
+"""[WAV CONVERT] -> Convert an audio file to WAV format (for pyannote.audio) using ffmpeg."""
 import subprocess
 def convert_to_wav(input_file_path):
-    """Convert an audio file to WAV format using ffmpeg."""
     # Construct WAV file path
     base, _ = os.path.splitext(input_file_path)
     wav_file_path = base + ".wav"
-    # FFMPEG conversion commands
+    # Commands/parameters for FFMPEG .wav conversion
     command = ["ffmpeg", "-i", input_file_path, "-acodec", "pcm_s16le", "-ar", "16000", "-ac", "1", wav_file_path]
     try:
         subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -28,7 +30,7 @@ def convert_to_wav(input_file_path):
     return wav_file_path
 
 
-"""[AUDIO FROM VIDEO URL] -> extract, convert audio from video"""
+"""[AUDIO FROM VIDEO URL] -> Extract, convert audio from video"""
 from yt_dlp import YoutubeDL
 import glob
 def extract_audio(url: str, save_dir=save_path):
@@ -36,33 +38,29 @@ def extract_audio(url: str, save_dir=save_path):
     # Fetch video info without downloading
     with YoutubeDL({'quiet': True, 'noplaylist': True}) as ydl:
         info_dict = ydl.extract_info(url, download=False)
-
     # Sanitize video title, create folder path
     video_title = sanitize_name(info_dict.get('title', 'audio'))
     audio_folder_path = os.path.join(save_dir, video_title)
     os.makedirs(audio_folder_path, exist_ok=True)
-
     # Check if an audio file already exists in the folder
     existing_files = glob.glob(os.path.join(audio_folder_path, 'audio.wav'))
     if existing_files:
-        # Use the first matching file
         audio_file_path = existing_files[0]
         duration = time.time() - start_time
         return audio_file_path, duration
-
+    # Download audio file from video
     audio_file_path_template = os.path.join(audio_folder_path, 'audio.%(ext)s')
     with YoutubeDL({'format': 'worstaudio/worst', 'outtmpl': audio_file_path_template}) as ydl:
         info_dict = ydl.extract_info(url, download=True)
         audio_file_path = ydl.prepare_filename(info_dict)
-    # Convert to WAV if not already in WAV format
+    # Convert audio to WAV if not already in WAV format
     if not audio_file_path.endswith('.wav'):
         audio_file_path = convert_to_wav(audio_file_path)
-
     duration = time.time() - start_time
     return audio_file_path, duration
 
 
-"""[AUDIO FROM UPLOAD] -> identify, process upload file for audio"""
+"""[AUDIO FROM UPLOAD] -> Identify, then process upload file for audio extraction"""
 import mimetypes
 from pydub import AudioSegment
 def process_upload(file_path: str):
@@ -80,7 +78,7 @@ def process_upload(file_path: str):
         raise ValueError("Unsupported file type")
 
 
-"""[AUDIO LENGTH] -> duration of audio file"""
+"""[AUDIO LENGTH] -> Fetch duration of audio"""
 from moviepy.editor import AudioFileClip
 def audio_length(file_path: str):
     # Check if the file exists
@@ -90,8 +88,9 @@ def audio_length(file_path: str):
     return clip.duration
 
 
-# [SPEAKER DIARIZATION] => generate rich transcription time marked (RTTM)
-# Note: speaker-diarization-3.0 stuck on 'cpu'--older version 4x faster w/ 'cuda'
+"""[SPEAKER DIARIZATION] => Partition audio stream into speaker_id segments, generate rich transcription time marked (RTTM)
+Note: Pre-trained model 'speaker-diarization-3.0' fails to utilize 'cuda' device (stuck on 'cpu').
+"""
 import torch
 from pyannote.audio import Pipeline
 hf_token = st.secrets["HUGGING_FACE_TOKEN"]
@@ -102,23 +101,21 @@ def diarize_audio(file_path: str, save_dir=save_path):
     start_time = time.time()
     # Perform speaker diarization
     diarization = pipeline(file_path, num_speakers=2)
-    # Generate RTTM output file
+    # Generate RTTM output file path
     audio_folder_path = os.path.dirname(file_path)
     rttm_output = os.path.join(audio_folder_path, "speakers.rttm")
-
     # Check if RTTM file has already been generated
     existing_rttm = glob.glob(os.path.join(audio_folder_path, 'speakers.rttm'))
     if existing_rttm:
         duration = time.time() - start_time
         return rttm_output, duration
-
     with open(rttm_output, "w") as rttm_file:
         diarization.write_rttm(rttm_file)
     duration = time.time() - start_time
     return rttm_output, duration
 
 
-# [RTTM PARSING] -> isolate speaker_ids and timestamps
+"""[RTTM PARSING] -> Isolate speaker_ids and timestamps"""
 def parse_rttm(file_path: str):
     start = time.time()
     with open(file_path, "r") as rttm:
@@ -134,44 +131,57 @@ def parse_rttm(file_path: str):
     return rttm_log, end_time
 
 
+""""[LANGUAGE ID] -> Converts language code to full language name"""
 from langcodes import Language
 def get_full_language(lang_code: str) -> str:
     language = Language.get(lang_code)
     return language.display_name()
 
 
-# [LANG DETECTION, TRANSCRIBING] -> audio to readable text
+"""[WHISPER TRANSCRIBING] -> Use OpenAI's whisper model to transcribe (+/- translate) audio to readable text"""
 import whisper
 import json
 def scribe_audio(file_path: str, model_name: str, translate: bool):
     start_time = time.time()
     model = whisper.load_model(name=model_name, device=devices)
-    script = model.transcribe(
-        audio=file_path,
-        word_timestamps=True,
-        )
+    script = model.transcribe(audio=file_path, word_timestamps=True)
     if translate and script['language'] != 'en':
         script = model.transcribe(
             audio=file_path,
             word_timestamps=True,
             task="translate",
             )
-
-    # Save full transcript as JSON
-    transcript_data = {
+    new_transcript_entry = {
         'model': model_name,
-        'transcript': script['text'].strip()
+        'text': script['text'].strip()
     }
     transcript_path = os.path.join(os.path.dirname(file_path), 'transcript.json')
+    # Load or initialize list of transcripts
+    try:
+        with open(transcript_path, 'r', encoding='utf-8') as f:
+            transcripts = json.load(f)
+            if not isinstance(transcripts, list):
+                raise ValueError("Invalid format in transcript.json")
+    except (FileNotFoundError, ValueError, json.JSONDecodeError):
+        transcripts = []
+    # Update or append new transcript entry
+    for entry in transcripts:
+        if entry['model'] == model_name:
+            entry['text'] = new_transcript_entry['text']
+            break
+    else:
+        transcripts.append(new_transcript_entry)
+    # Write transcript data to JSON
     with open(transcript_path, 'w', encoding='utf-8') as f:
-        json.dump(transcript_data, f, ensure_ascii=False, indent=4)
-
+        json.dump(transcripts, f, ensure_ascii=False, indent=4)
     duration = time.time() - start_time
     return script, duration
 
 
-# [TRANSCRIPT ALIGNMENT] -> synchronize, then align timestamps with speaker_ids + text
-def align_script(transcript, rttm_data, tolerance: float):
+"""[TRANSCRIPT ALIGNMENT] -> Synchronize, then align timestamps with speaker_ids + text
+Note: Whisper's generated timestamps are sometimes inaccurate and differ from their Pyannote counterpart.
+This is just a quick and dirty method of generating more accurate timestamps through comparisons, tempered by tolerance level."""
+def align_script(transcript, rttm_data, tolerance: float = 1.5):
     exec_start = time.time()
     sentences = []
     for segment in transcript['segments']:
@@ -194,19 +204,20 @@ def align_script(transcript, rttm_data, tolerance: float):
     return sentences, duration
 
 
+"""[SUMMARIZATION] -> Generate a summary via a gpt model based on the full transcript"""
 from openai import OpenAI
 def summarize(transcript_text):
     client = OpenAI()
+    context = "You are an instructive assistant, skilled in summarizing ideas/concepts from audio/video transcripts in JSON output."
     response = client.chat.completions.create(
         model="gpt-3.5-turbo-1106",
         response_format={ "type": "json_object" },
         messages=[
-            {"role": "system", "content": "You are an instructive assistant, skilled in summarizing ideas/concepts from audio/video transcripts in a JSON output."},
+            {"role": "system", "content": context},
             {"role": "user", "content": f"Summarize the following text:\n{transcript_text}"}
         ],
         max_tokens=200,
     )
-
     json_res = response.choices[0].message.content
     summary = json.loads(json_res)['summary']
     return summary

@@ -14,7 +14,7 @@ from streamlit.runtime.scriptrunner import get_script_run_ctx
 from config import fetch_page_cfg
 from logic.utils import threaded_task, progress_bar, gpu
 from logic.submit import url_change, url_submit, upload_change, upload_label, upload_submit
-from logic.models import display_models, toggle_en, toggle_trans, model_params, model_speeds, model_switch, model_param_delta, model_speed_delta
+from logic.models import display_models, update_display, toggle_en, toggle_trans, model_params, model_speeds, model_switch, model_param_delta, model_speed_delta
 from logic.process import save_path, extract_audio, process_upload, audio_length, diarize_audio, parse_rttm, scribe_audio, get_full_language, align_script, summarize
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
@@ -74,6 +74,7 @@ h1 = row([5], vertical_align="bottom")
 c0, c1, c2, c3 = h1.columns([4.1, 0.25, 1.4, 2.5])
 h2 = row([1, 4], vertical_align="top")
 
+update_display()
 whisper_model = c0.selectbox(
     label="Whisper model :gray[(req. VRAM)]:",
     options=display_models,
