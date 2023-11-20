@@ -1,3 +1,6 @@
+# Byte-compiled
+__pycache__/
+
 # API KEYS
 .streamlit/secrets.toml
 
