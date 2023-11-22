@@ -14,7 +14,7 @@
 ><div align="center"><em>To whispers unheard,<br>traverse digital oceans<br>for treasures unseen.</em></div>
 
 
-### Features:
+## Features:
 **Processing Pipeline:**  [yt-dlp](https://github.com/yt-dlp/yt-dlp), [Pyannote Audio](https://github.com/pyannote/pyannote-audio), [OpenAI Whisper](https://github.com/openai/whisper)
 
 📡 Audio Extraction: Pull from various video platforms
@@ -27,7 +27,7 @@
 
 💬 Summarize: Generate summaries based on transcript
 
-### Setup:
+## Setup:
 1. Install ffmpeg and requirements:
 ```console
 sudo apt install ffmpeg
@@ -40,7 +40,7 @@ pip install -r requirements.txt
 streamlit run app/Home.py
 ```
 
-### Usage:
+## Usage:
 1. Select whisper model and options
 2. Input or upload video/audio file
 3. Submit for transcription
