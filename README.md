@@ -4,11 +4,7 @@
 
 **Vialect** _transforms video/audio media into workable, transcribed text._
 
-> <div style="text-align: center; font-style: italic;">
-With whispers unheard,<br>
-traverse digital oceans<br>
-for treasures unseen.
-</div>
+> <div style="text-align: center; font-style: italic;">To whispers unheard,<br>traverse digital oceans<br>for treasures unseen.</div>
 
 ## Features
 **Processing Pipeline:**  [yt-dlp](https://github.com/yt-dlp/yt-dlp), [Pyannote Audio](https://github.com/pyannote/pyannote-audio), [OpenAI Whisper](https://github.com/openai/whisper)

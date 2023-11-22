@@ -33,8 +33,8 @@ for state in state_inits:
 ####################################################################################################
 st.set_page_config(**page_cfg())
 
-with open("./app/style.css") as global_css, open("./app/views/icons.css") as icon_css:
-    styles = global_css.read() + "\n" + icon_css.read()
+with open("./app/style.css") as global_css, open("./app/views/render.css") as render_css:
+    styles = global_css.read() + "\n" + render_css.read()
     st.markdown(f'<style>{styles}</style>' , unsafe_allow_html= True)
 
 with st.sidebar:
