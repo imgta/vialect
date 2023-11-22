@@ -1,8 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Alice&family=Annie+Use+Your+Telescope&family=Bruno+Ace+SC&family=Cute+Font&family=Italiana&family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&family=Julius+Sans+One&family=Libre+Barcode+128+Text&display=swap');
 
+[data-testid="stMetricValue"] {font-size: 28px;}
+
 div.heading-con {
     display: flex;
     flex-wrap: nowrap;
+    white-space: nowrap;
 }
 
 p.home-header {
@@ -34,12 +37,10 @@ span.header-motto {
     font-weight: 400;
     font-size: 0.75rem;
     padding-top: 0.75rem;
-    padding-left: 0.25rem;
+    padding-left: 0.4rem;
 }
 
 hr {
     border-bottom: 2px solid rgb(109, 63, 192);
     margin: 0;
 }
-
-[data-testid="stMetricValue"] {font-size: 28px;}

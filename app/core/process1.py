@@ -1,17 +1,9 @@
 import os
 import time
 import streamlit as st
-from logic.utils import format_timestamp
+from core.utils import format_timestamp, sanitize_name
 
 save_path = ".\\data\\media"
-
-"""[SANITIZE DIRECTORY NAME] -> Replace all non-alphanumeric characters with _,  limit character length."""
-def sanitize_name(title, max_length=200):
-    sanitized = ''.join('_' if not char.isalnum() else char for char in title)
-    if len(sanitized) > max_length:
-        sanitized = sanitized[:max_length]
-    return sanitized
-
 
 """[WAV CONVERT] -> Convert an audio file to WAV format (for pyannote.audio) using ffmpeg."""
 import subprocess
@@ -20,7 +12,7 @@ def convert_to_wav(input_file_path):
     base, _ = os.path.splitext(input_file_path)
     wav_file_path = base + ".wav"
     # Commands/parameters for FFMPEG .wav conversion
-    command = ["ffmpeg", "-i", input_file_path, "-acodec", "pcm_s16le", "-ar", "16000", "-ac", "1", wav_file_path]
+    command = ["ffmpeg", "-i", input_file_path, "-ar", "16000", "-ac", "1", wav_file_path]
     try:
         subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print(f"Converted {input_file_path} to {wav_file_path}")
@@ -89,15 +81,15 @@ def audio_length(file_path: str):
 
 
 """[SPEAKER DIARIZATION] => Partition audio stream into speaker_id segments, generate rich transcription time marked (RTTM)
-Note: Pre-trained model 'speaker-diarization-3.0' fails to utilize 'cuda' device (stuck on 'cpu').
+Note: Use 'speaker-diarization@2.1' as a fallback. Version 3.1 can now utilize cuda devices (GPU).
 """
 import torch
 from pyannote.audio import Pipeline
 hf_token = st.secrets["HUGGING_FACE_TOKEN"]
 devices = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization@2.1", use_auth_token=hf_token).to(devices)
-# pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization-3.0", use_auth_token=hf_token).to(device)
-def diarize_audio(file_path: str, save_dir=save_path):
+# pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization@2.1", use_auth_token=hf_token).to(devices)
+pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization-3.1", use_auth_token=hf_token).to(devices)
+def diarize_audio(file_path: str):
     start_time = time.time()
     # Perform speaker diarization
     diarization = pipeline(file_path, num_speakers=2)
@@ -208,7 +200,7 @@ def align_script(transcript, rttm_data, tolerance: float = 1.5):
 from openai import OpenAI
 def summarize(transcript_text):
     client = OpenAI()
-    context = "You are an instructive assistant, skilled in summarizing ideas/concepts from audio/video transcripts in JSON output."
+    context = "You are an instructive assistant, skilled in summarizing ideas/concepts from audio/video transcripts in JSON output: { 'summary': <summary here> }"
     response = client.chat.completions.create(
         model="gpt-3.5-turbo-1106",
         response_format={ "type": "json_object" },
@@ -216,7 +208,7 @@ def summarize(transcript_text):
             {"role": "system", "content": context},
             {"role": "user", "content": f"Summarize the following text:\n{transcript_text}"}
         ],
-        max_tokens=200,
+        max_tokens=300,
     )
     json_res = response.choices[0].message.content
     summary = json.loads(json_res)['summary']
