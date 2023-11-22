@@ -15,7 +15,7 @@
 
 
 ## Features:
-**Processing Pipeline:**  [yt-dlp](https://github.com/yt-dlp/yt-dlp), [Pyannote Audio](https://github.com/pyannote/pyannote-audio), [OpenAI Whisper](https://github.com/openai/whisper)
+**Key Packages:**  [yt-dlp](https://github.com/yt-dlp/yt-dlp), [Pyannote Audio](https://github.com/pyannote/pyannote-audio), [OpenAI Whisper](https://github.com/openai/whisper), [Streamlit](https://github.com/streamlit/streamlit)
 
 >📡 **Audio Extraction:** Pull from various video platforms  
 🛸 **ASR & Diarization:** ID speakers with timestamps  
