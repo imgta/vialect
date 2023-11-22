@@ -14,7 +14,6 @@
 ><div align="center">To whispers unheard,  <br>traverse digital oceans<br>for treasures unseen.
 </div>
 
----
 **Processing Pipeline:**  [yt-dlp](https://github.com/yt-dlp/yt-dlp), [Pyannote Audio](https://github.com/pyannote/pyannote-audio), [OpenAI Whisper](https://github.com/openai/whisper)
 ### Features:
 📡 Audio Extraction: Pull from various video platforms
