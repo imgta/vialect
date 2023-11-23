@@ -11,7 +11,7 @@
 
 <p align="center"><em>Streamline your media by transforming audio into workable text and summaries!</em></p>
 
-><div align="center"><em>To lectures unheard,<br>traverse digital oceans<br>for treasures unseen.</em></div>
+><div align="center"><em>Toward words unheard,<br>traverse digital oceans<br>for treasures unseen.</em></div>
 
 
 ## Features:
