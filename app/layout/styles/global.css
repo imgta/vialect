@@ -1,13 +1,26 @@
 @import url('https://fonts.googleapis.com/css2?family=Alice&family=Annie+Use+Your+Telescope&family=Bruno+Ace+SC&family=Cute+Font&family=Italiana&family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&family=Julius+Sans+One&family=Libre+Barcode+128+Text&display=swap');
 
 [data-testid="stMetricValue"] {font-size: 28px;}
+[data-testid="stSidebar"] {background-color:rgba(31, 32, 33, 0.705);}
 
-div.heading-con {
+.st-cb:hover {
+    cursor: pointer;
+}
+.st-cb:focus {
+    cursor: text;
+}
+
+
+div.heading-con, div.heading-side {
     display: flex;
+    height: 75px;
     flex-wrap: nowrap;
     white-space: nowrap;
 }
-
+div.heading-con {
+    padding-left: 0.875rem;
+    z-index: 20;
+}
 p.home-header {
     /* font-family: 'Annie Use Your Telescope', cursive; */
     /* font-family: 'Julius Sans One'; */
@@ -19,8 +32,7 @@ p.home-header {
     font-size: 3rem;
     margin: 0px;
 }
-
-div.header-i {
+span.header-i {
     font-family: 'Libre Barcode 128 Text';
     letter-spacing: -0.5px;
     font-style: oblique 27.5deg;
@@ -28,17 +40,39 @@ div.header-i {
     margin: 0 -0.5rem 0 -0.125rem;
     line-height: 4.825rem;
 }
-
 span.header-motto {
     font-family: 'JetBrains', monospace;
-    color: #ffffff40;
+    color: #ffffff80;
     letter-spacing: -0px;
     line-height: 1rem;
     font-weight: 400;
     font-size: 0.75rem;
     padding-top: 0.75rem;
-    padding-left: 0.4rem;
+    padding-left: 0.5rem;
 }
+
+
+div.header-cuda {
+    display: inline-block;
+    align-self: flex-start;
+    text-align:justify;
+    columns: 3;
+    column-width: 6rem;
+}
+div.header-cuda p {
+    font-family: "Source Sans Pro", sans-serif;
+    color: rgba(250, 250, 250, 0.6);
+    font-size: 14px;
+    column-span:none;
+    margin: 0;
+}
+div.header-cuda p.vram {
+    padding-left: 3rem;
+}
+div.header-cuda p span.cuda-info {
+    color: rgb(61, 213, 109);
+}
+
 
 hr {
     border-bottom: 2px solid rgb(109, 63, 192);

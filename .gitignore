@@ -11,3 +11,4 @@ __pycache__/
 # FILE EXTRACTIONS, TESTING
 data
 workshop
+tester.py

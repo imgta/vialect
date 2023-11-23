@@ -1,11 +1,12 @@
 from typing import Optional
 import streamlit as st
 
+
 class ModelSelect:
     models = ["tiny", "base", "small", "medium", "large"]
     vrams = ["1 GB", "1 GB", "2 GB", "5 GB", "10 GB"]
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.selection = [f"{model} ({vram})" for model, vram in zip(self.models, self.vrams)]
 
     def whisper_map(self, model: str, use_english: bool) -> str:
@@ -65,8 +66,7 @@ class ModelSelect:
         delta = st.session_state.speed1 - st.session_state.speed0
         return f"{delta}x" if delta != 0 else None
 
-
-    def model_switch(self):
+    def model_switch(self) -> None:
         st.session_state.whisp = self.whisper_map(st.session_state.w_model, st.session_state.english)
         st.session_state.param0, st.session_state.speed0  = st.session_state.param1, st.session_state.speed1
         st.session_state.param1, st.session_state.speed1 = self.model_params(st.session_state.whisp), self.model_speeds(st.session_state.whisp)

@@ -79,6 +79,7 @@ class AudioProcess:
 
 
 from pyannote.audio import Pipeline
+from core.utils import TaskUtility
 from langcodes import Language
 import streamlit as st
 import openai
@@ -88,9 +89,10 @@ import json
 
 
 class AudioTransform:
+    tU = TaskUtility()
     openai.api_key = st.secrets["OPENAI_API_KEY"]
     hf_token = st.secrets["HUGGING_FACE_TOKEN"]
-    devices = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    devices = torch.device("cuda:0" if tU.has_cuda() else "cpu")
     pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization-3.1", use_auth_token=hf_token).to(devices)
 
     """[SPEAKER DIARIZATION] => Partition audio stream into speaker_id segments, generate rich transcription time marked (RTTM)
@@ -102,7 +104,6 @@ class AudioTransform:
         # Generate RTTM output path
         audio_folder_path = os.path.dirname(file_path)
         rttm_output = os.path.join(audio_folder_path, "speakers.rttm")
-        # Check if RTTM has already been generated
         existing_rttm = glob.glob(os.path.join(audio_folder_path, 'speakers.rttm'))
         if existing_rttm:
             duration = time.time() - start_time

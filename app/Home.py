@@ -1,59 +1,26 @@
 import os
-import torch
 import threading
-import streamlit as st
 
-from streamlit.runtime.scriptrunner import get_script_run_ctx
+import streamlit as st
+from streamlit_extras.row import row
 from streamlit_player import st_player
 from streamlit_extras.grid import grid
-from streamlit_extras.row import row
+from streamlit.runtime.scriptrunner import get_script_run_ctx
 
 from config import page_cfg
+from layout.render import set_layout
 from core.models import ModelSelect
 from core.utils import TaskUtility, Inputs
+from core.states import init_session_states
 from core.process import AudioProcess, AudioTransform
-from views.render import via_header, icon_btns, tip_button
-vial_header, icons, coffee = via_header(), icon_btns(), tip_button()
 tU, inP, mS, aP, aT = TaskUtility(), Inputs(), ModelSelect(), AudioProcess(), AudioTransform()
 
 ####################################################################################################
-state_inits = ['english', 'translate', 'url', 'upload', 'attached', 'url_btn', 'upload_btn', 'processing', 'audio', 'diarize', 'rttm', 'transcript', 'whisp', 'param0', 'param1', 'speed0', 'speed1']
-
-for state in state_inits:
-    if state not in st.session_state:
-        if state in ['param0', 'param1']:
-            st.session_state[state] = mS.model_params(st.session_state.get('whisp', 'tiny'))
-        elif state in ['speed0', 'speed1']:
-            st.session_state[state] = mS.model_speeds(st.session_state.get('whisp', 'tiny'))
-        elif state == 'whisp':
-            st.session_state[state] = 'tiny'
-        else:
-            st.session_state[state] = False
-
-####################################################################################################
 st.set_page_config(**page_cfg())
-
-with open("./app/style.css") as global_css, open("./app/views/render.css") as render_css:
-    styles = global_css.read() + "\n" + render_css.read()
-    st.markdown(f'<style>{styles}</style>' , unsafe_allow_html= True)
-
-with st.sidebar:
-    st.markdown(icons, unsafe_allow_html=True)
-    st.markdown(coffee, unsafe_allow_html=True)
+set_layout()
+init_session_states()
 
 ####################################################################################################
-top = row([5], vertical_align="bottom")
-t0, t1 = top.columns([4.15, 1])
-st.markdown(vial_header, unsafe_allow_html=True)
-
-h0 = row([5], vertical_align="top")
-d0, d1, d2, d3 = h0.columns([1.65, 1.22, 1, 0.85])
-
-d0.caption(f"**Device:** :green[{tU.gpu_device.name}]")
-d1.caption(f"**CUDA Available:** :green[{torch.cuda.is_available()}]")
-d2.caption(f"**VRAM:** :green[{tU.gpu_device.memoryFree//1024}] / {tU.gpu_device.memoryTotal//1024} GB")
-
-
 h1 = row([5], vertical_align="bottom")
 c0, c1, c2, c3 = h1.columns([4.1, 0.25, 1.4, 2.5])
 h2 = row([1, 4], vertical_align="top")

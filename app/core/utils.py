@@ -3,11 +3,16 @@ from threading import Thread
 import streamlit as st
 import validators
 import GPUtil
+import torch
 import time
 
 
 class TaskUtility:
     gpu_device = GPUtil.getGPUs()[0]
+
+    @staticmethod
+    def has_cuda():
+        return torch.cuda.is_available()
 
     """[THREADING TASKS] -> Execute tasks in parallel and asynchronously collect results."""
     @staticmethod

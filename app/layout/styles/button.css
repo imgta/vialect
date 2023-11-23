@@ -1,22 +1,21 @@
 div.tab-con {
     display: flex;
-    justify-content: center;
+    justify-content: start;
     align-items: center;
 }
 .tabs {
     /* background: #FFFFFF; */
-    /* background: transparent; */
     /* box-shadow: 0 10px 30px rgba(65, 72, 86, 0.05); */
-    width: 150px;
-    height: 75px;
+    /* padding: 0 1rem; */
+    width: 90px;
+    height: 70px;
     position: relative;
     border-radius: 25px;
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
     align-items: center;
     overflow: hidden;
-    padding: 0 1rem;
-    box-sizing: border-box;
+    /* box-sizing: border-box; */
 }
 .tabs a label {
     width: 36px;
@@ -74,55 +73,52 @@ div.tab-con {
 }
 @keyframes stretch-animation {
     25% {
-    transform: scale3d(.9, 1.2, 1);
-    margin-top: 10px;
+        transform: scale3d(.9, 1.2, 1);
+        margin-top: 10px;
     }
     75% {
-    transform: scale3d(1.1, .95, 1);
+        transform: scale3d(1.1, .95, 1);
     }
 }
 @keyframes drop-animation {
     70% {
-    transform: scale(1, 2) rotate(45deg);
-    top: -7px;
+        transform: scale(1, 2) rotate(45deg);
+        top: -7px;
     }
     80% {
         z-index: 0;
     }
     100% {
-    transform: scale(1.5, .5) rotate(45deg);
-    top: 8px;
-    z-index: -1;
+        transform: scale(1.5, .5) rotate(45deg);
+        top: 8px;
+        z-index: -1;
     }
 }
 @keyframes clip-animation {
     from {
-    opacity: 1;
-    clip-path: circle(0% at 50% -20%);
+        opacity: 1;
+        clip-path: circle(0% at 50% -20%);
     }
     to {
-    opacity: 1;
-    clip-path: circle(110% at top);
+        opacity: 1;
+        clip-path: circle(110% at top);
     }
 }
 @keyframes clip-animation-border {
     from {
-    opacity: 1;
-    clip-path: circle(20% at 50% -20%);
+        opacity: 1;
+        clip-path: circle(20% at 50% -20%);
     }
     to {
-    opacity: 1;
-    clip-path: circle(130% at top);
+        opacity: 1;
+        clip-path: circle(130% at top);
     }
 }
 
-
 div.tip-container {
     position:fixed;
-    /* top: 8px;
-    left: 12px; */
-    top: 95.5%;
-    left: 1.5rem;
+    top: 95.75%;
+    left: 0.95rem;
     width: 100%;
     display: flex;
     justify-content: space-between;
