@@ -1,4 +1,4 @@
-<h1 align="center">👾 V/ALect</h1>
+<h1 align="center">🌊 V/ALect</h1>
 
 <div align="center">
     <a href="https://github.com/imgta/vialect/search?l=python" target="_blank">
@@ -8,11 +8,14 @@
         <img src="https://img.shields.io/github/last-commit/imgta/vialect" alt="Last Commit"/>
     </a>
 </div>
+<p align="center"><strong><em>ViaLect</strong> streamlines your intake of multimedia content by transforming audio into workable text and generating summaries!</em></p>
+<div align="center">
+    
+$`\textcolor{gray}{\textit{Toward words unheard,}}`$<br>
+$`\textcolor{gray}{\textit{traverse digital oceans}}`$<br>
+$`\textcolor{gray}{\textit{for treasures unseen.}}`$
 
-<p align="center"><em>Streamline your media by transforming audio into workable text and summaries!</em></p>
-
-><div align="center"><em>Toward words unheard,<br>traverse digital oceans<br>for treasures unseen.</em></div>
-
+</div>
 
 ## Features:
 **Key Packages:**  [OpenAI Whisper](https://github.com/openai/whisper), [PyTorch (CUDA v11.8)](https://pytorch.org/get-started/locally/), [pyannote.audio](https://github.com/pyannote/pyannote-audio), [yt-dlp](https://github.com/yt-dlp/yt-dlp), [Streamlit](https://github.com/streamlit/streamlit)
