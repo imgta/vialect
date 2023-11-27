@@ -22,6 +22,9 @@
 🌎 **Translation:** Detect and translate languages to English  
 🤖 **Transcribing:** Speech-to-text from extracted audio  
 💬 **Summarization:** Generate summaries based on transcript  
+🚀 **Intuitive UI:** Seamless frontend layout via Streamlit
+
+![vialect_ss](https://github.com/imgta/vialect/assets/126015138/bed7b8c4-2994-4a2f-82e4-ee2636194d22)
 
 ## Setup:
 1. Install ffmpeg and requirements:
