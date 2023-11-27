@@ -8,7 +8,7 @@
         <img src="https://img.shields.io/github/last-commit/imgta/vialect" alt="Last Commit"/>
     </a>
 </div>
-<p align="center"><strong><em>ViaLect</strong> streamlines your intake of multimedia content by transforming audio into workable text and generating summaries!</em></p>
+<p align="center"><strong><em>ViaLect</strong> streamlines your media intake by transforming audio into workable text and generating summaries!</em></p>
 <div align="center">
     
 $`\textcolor{gray}{\textit{Toward words unheard,}}`$<br>
