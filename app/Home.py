@@ -1,52 +1,48 @@
 import os
 import threading
-
 import streamlit as st
 from streamlit_extras.row import row
 from streamlit_player import st_player
 from streamlit_extras.grid import grid
 from streamlit.runtime.scriptrunner import get_script_run_ctx
 
-from config import page_cfg
+####################################################################################################
+from core.states import init_session_states
 from layout.render import set_layout
+from config import page_cfg
+st.set_page_config(**page_cfg())
+init_session_states()
+set_layout()
+
+####################################################################################################
 from core.models import ModelSelect
 from core.utils import TaskUtility, Inputs
-from core.states import init_session_states
 from core.process import AudioProcess, AudioTransform
 tU, inP, mS, aP, aT = TaskUtility(), Inputs(), ModelSelect(), AudioProcess(), AudioTransform()
 
 ####################################################################################################
-st.set_page_config(**page_cfg())
-set_layout()
-init_session_states()
-
-####################################################################################################
-h1 = row([5], vertical_align="bottom")
-c0, c1, c2, c3 = h1.columns([4.1, 0.25, 1.4, 2.5])
-h2 = row([1, 4], vertical_align="top")
-
+h0 = row([5, 3], vertical_align="center")
+c0, c1, = h0.columns([6, 3])
+c2, c3 = h0.columns([1, 1])
 whisper_model = c0.selectbox(
-    label="Whisper model :gray[(req. VRAM)]:",
+    label="Whisper model :gray[(min. VRAM)]:",
     options=mS.update_display(),
     key="w_model",
     on_change=mS.model_switch,
     help="Smaller models are faster, but larger models offer more accuracy.",
 )
-
-en_mode = h2.checkbox(
+en_mode = c1.checkbox(
     label="English",
     value=st.session_state.english,
     on_change=mS.toggle_en,
     help="Noticeable performance bumps when using tiny.en or base.en in English-only use cases.",
 )
-lang_mode = h2.checkbox(
+lang_mode = c1.checkbox(
     label="Translate",
     value=st.session_state.translate,
     on_change=mS.toggle_trans,
     help="Detects and translates language to English.",
 )
-
-c1.empty()
 c2.metric(
     label="Parameters",
     value=f"{mS.model_params(st.session_state.whisp)}M",
@@ -60,13 +56,12 @@ c3.metric(
     help="Inference speeds (relative) decrease as model sizes grow.",
 )
 
+
 g1 = grid([4,1], [4,1], [4,1], [4,1], vertical_align="bottom")
 video_url = g1.text_input(label="Enter a video URL:", placeholder="YouTube, Vimeo, Dailymotion, etc.") if not st.session_state.upload_btn else g1.empty()
 if video_url:
     if inP.url_change(video_url):
         url_btn = g1.button(label="Submit URL", on_click=inP.url_submit, use_container_width=True)
-    else:
-        g1.empty()
 else:
     g1.empty()
 
@@ -184,11 +179,11 @@ if st.session_state.url_btn or st.session_state.upload_btn:
                 with g2.expander(label="Aligned Transcript:"):
                     for log in dialogues:
                         st.caption(f"{log}\n")
-                with g2.expander(label=f"Full Transcript [{select_model}]:"):
-                    st.text_area(label=" ", value=transcript['text'].strip(), height=250)
+                with g2.expander(label=f"Transcribed Text:"):
+                    st.text_area(label="Transcribed Text", value=transcript['text'].strip(), height=250, label_visibility="hidden")
                 with st.expander(label="Summary:"):
                     prompt_text = transcript['text'].strip()
-                    st.text_area(label="", value=aT.summarize(prompt_text), height=250)
+                    st.text_area(label="Summary", value=aT.summarize(prompt_text), height=200, label_visibility="hidden")
 
 else:
     if video_url and not inP.url_change(video_url):

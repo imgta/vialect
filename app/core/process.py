@@ -3,6 +3,7 @@ from core.utils import TaskUtility
 from pydub import AudioSegment
 from yt_dlp import YoutubeDL
 from typing import Optional
+import streamlit as st
 import subprocess
 import mimetypes
 import glob
@@ -13,6 +14,7 @@ import os
 tU = TaskUtility()
 class AudioProcess:
     SAVE_DIR = ".\\data\\media"
+
     """[WAV CONVERT] -> Convert an audio file to WAV format (for pyannote.audio) using ffmpeg."""
     @staticmethod
     def convert_to_wav(input_file_path: str) -> Optional[str]:
@@ -40,19 +42,21 @@ class AudioProcess:
         # Check if an audio file already exists in the folder
         existing_files = glob.glob(os.path.join(audio_folder_path, 'audio.wav'))
         if existing_files:
+            st.success(body="Existing audio file found!", icon="✔")
             audio_file_path = existing_files[0]
             duration = time.time() - start_time
             return audio_file_path, duration
-        # Download audio file from video
-        audio_file_path_template = os.path.join(audio_folder_path, 'audio.%(ext)s')
-        with YoutubeDL({'format': 'worstaudio/worst', 'outtmpl': audio_file_path_template}) as ydl:
-            info_dict = ydl.extract_info(url, download=True)
-            audio_file_path = ydl.prepare_filename(info_dict)
-        # Convert audio to WAV if not already in WAV format
-        if not audio_file_path.endswith('.wav'):
-            audio_file_path = self.convert_to_wav(audio_file_path)
-        duration = time.time() - start_time
-        return audio_file_path, duration
+        else:
+            # Download audio file from video
+            audio_file_path_template = os.path.join(audio_folder_path, 'audio.%(ext)s')
+            with YoutubeDL({'format': 'worstaudio/worst', 'outtmpl': audio_file_path_template}) as ydl:
+                info_dict = ydl.extract_info(url, download=True)
+                audio_file_path = ydl.prepare_filename(info_dict)
+            # Convert audio to WAV if not already in WAV format
+            if not audio_file_path.endswith('.wav'):
+                audio_file_path = self.convert_to_wav(audio_file_path)
+            duration = time.time() - start_time
+            return audio_file_path, duration
 
     """[AUDIO FROM UPLOAD] -> Identify, then process upload file for audio extraction"""
     def process_upload(self, file_path: str) -> tuple[str, float]:
@@ -81,19 +85,16 @@ class AudioProcess:
 from pyannote.audio import Pipeline
 from core.utils import TaskUtility
 from langcodes import Language
-import streamlit as st
-import openai
 import whisper
+import openai
 import torch
 import json
 
 
 class AudioTransform:
     tU = TaskUtility()
-    openai.api_key = st.secrets["OPENAI_API_KEY"]
-    hf_token = st.secrets["HUGGING_FACE_TOKEN"]
     devices = torch.device("cuda:0" if tU.has_cuda() else "cpu")
-    pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization-3.1", use_auth_token=hf_token).to(devices)
+    pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization-3.1", use_auth_token=st.session_state['hf_access_token']).to(devices)
 
     """[SPEAKER DIARIZATION] => Partition audio stream into speaker_id segments, generate rich transcription time marked (RTTM)
     Note: Use 'speaker-diarization@2.1' as a fallback. Version 3.1 can now utilize cuda devices (GPU)."""
@@ -106,12 +107,14 @@ class AudioTransform:
         rttm_output = os.path.join(audio_folder_path, "speakers.rttm")
         existing_rttm = glob.glob(os.path.join(audio_folder_path, 'speakers.rttm'))
         if existing_rttm:
+            st.success(body="Existing RTTM found!", icon="✔")
             duration = time.time() - start_time
             return rttm_output, duration
-        with open(rttm_output, "w") as rttm_file:
-            diarization.write_rttm(rttm_file)
-        duration = time.time() - start_time
-        return rttm_output, duration
+        else:
+            with open(rttm_output, "w") as rttm_file:
+                diarization.write_rttm(rttm_file)
+            duration = time.time() - start_time
+            return rttm_output, duration
 
     """[RTTM PARSING] -> Isolate speaker_ids and timestamps"""
     @staticmethod
@@ -195,10 +198,10 @@ class AudioTransform:
         duration = time.time() - exec_start
         return sentences, duration
 
-    """[SUMMARIZATION] -> Generate a summary via a gpt model based on the full transcript"""
+    """[SUMMARIZATION] -> Generate a summary in JSON format via a gpt model from full transcript text"""
     def summarize(self,transcript_text: str) -> str:
-        client = openai.OpenAI()
-        context = "You are an instructive assistant, skilled in summarizing ideas/concepts from audio/video transcripts in JSON output: { 'summary': <summary here> }"
+        client = openai.OpenAI(api_key=st.session_state['openai_api_key'])
+        context = "You are skilled in summarizing ideas/concepts from audio/video transcripts in JSON output: { 'summary': <summary here> }"
         response = client.chat.completions.create(
             model="gpt-3.5-turbo-1106",
             response_format={ "type": "json_object" },
