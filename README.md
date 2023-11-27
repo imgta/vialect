@@ -1,4 +1,4 @@
-<h1 align="center">🌊 V/ALect</h1>
+<h1 align="center">👾 V/ALect</h1>
 
 <div align="center">
     <a href="https://github.com/imgta/vialect/search?l=python" target="_blank">
