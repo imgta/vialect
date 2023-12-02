@@ -21,7 +21,7 @@ from core.process import AudioProcess, AudioTransform
 tU, inP, mS, aP, aT = TaskUtility(), Inputs(), ModelSelect(), AudioProcess(), AudioTransform()
 
 ####################################################################################################
-h0 = row([5, 3], vertical_align="center")
+h0 = row([5, 3], vertical_align="bottom")
 c0, c1, = h0.columns([6, 3])
 c2, c3 = h0.columns([1, 1])
 whisper_model = c0.selectbox(
@@ -66,7 +66,8 @@ else: g1.empty()
 
 if st.session_state.url:
     st.session_state.url_btn = True
-    st_player(url=video_url)
+    # st_player(url=video_url)
+    with st.sidebar: st_player(url=video_url)
 
 upload_file = g1.file_uploader(label="Upload video or audio:", type=['wav', 'mp3', 'ogg', 'mp4', 'mkv', 'avi', 'mov', 'flv'], on_change=inP.upload_change, label_visibility=inP.upload_label()) if not st.session_state.url_btn else g1.empty()
 if upload_file and not st.session_state.url_btn:
@@ -85,7 +86,7 @@ if st.session_state.upload:
         with open(upload_path, "wb") as f:
             f.write(upload_file.getbuffer())
 
-g2 = grid([5], [1.1, 1.35, 1.2, 1.4], [5], [5], 1, 1, 1, vertical_align="center")
+g2 = grid([5], [2,2,2,2], [5], [5], 1, 1, 1, vertical_align="center")
 if st.session_state.url_btn or st.session_state.upload_btn:
     if st.session_state.url_btn:
         url_dict = {}
@@ -100,7 +101,6 @@ if st.session_state.url_btn or st.session_state.upload_btn:
         if 'error' in url_dict:
             st.error(f"Error processing audio: {url_dict['error']}")
         audio_file, extract_time = url_dict['result'], url_dict['duration']
-        audio_duration = aP.audio_length(audio_file)
         st.session_state.audio = True
 
     if st.session_state.upload_btn:
@@ -114,12 +114,11 @@ if st.session_state.url_btn or st.session_state.upload_btn:
         tU.progress_bar(task_upload, "Processing upload...")
         task_upload.join()
         audio_file, extract_time = upload_dict['result'], upload_dict['duration']
-        audio_duration = aP.audio_length(audio_file)
         st.session_state.audio = True
 
     if st.session_state.audio:
-        g2.audio(audio_file)
-        g2.caption(f"**Audio Extraction:** *:blue[{extract_time:.2f}s]*")
+        g2.audio(data=audio_file, format="audio/ogg")
+        g2.caption(f"**Audio Extracted:** *:blue[{extract_time:.2f}s]*")
 
         diarize_dict = {}
         task_diarize = threading.Thread(
@@ -157,11 +156,12 @@ if st.session_state.url_btn or st.session_state.upload_btn:
             rttm_data, rttm_time = rttm_dict['result'], rttm_dict['duration']
             st.session_state.rttm = rttm_data is not None
             transcript, scribe_time = scribe_dict['result'], scribe_dict['duration']
+
+
             language = aT.get_full_language(transcript['language'])
             st.session_state.transcript = True
 
             if st.session_state.transcript:
-                g2.caption(f"**Speaker Diarization:** *:blue[{diarize_time:.2f}s]*")
                 align_dict = {}
                 task_align = threading.Thread(
                     target=tU.threaded_task,
@@ -173,7 +173,8 @@ if st.session_state.url_btn or st.session_state.upload_btn:
                 task_align.join()
                 dialogues, align_time = align_dict['result'], align_dict['duration']
                 g2.caption(f"**Language:** *:green[{language}]*")
-                g2.caption(f"**Whisper Transcription:** *:blue[{scribe_time:.2f}s]*")
+                g2.caption(f"**Speaker Diarized:** *:blue[{diarize_time:.2f}s]*")
+                g2.caption(f"**Audio Transcribed:** *:blue[{scribe_time:.2f}s]*")
                 with g2.expander(label="Aligned Transcript:"):
                     for log in dialogues:
                         st.caption(f"{log}\n")

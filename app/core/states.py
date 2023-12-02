@@ -41,20 +41,21 @@ class KeyStates:
 
     def openai_placehold(self) -> str:
         if self.has_secret_openai():
-            return "API Key imported from 'secrets.toml'"
+            return "✔ API Key imported from 'secrets.toml'"
         else:
             return "Paste your OpenAI API key here (sk-...)"
 
     def hf_placehold(self) -> str:
         if self.has_secret_hf_token():
-            return "Token imported from 'secrets.toml'"
+            return "✔ Token imported from 'secrets.toml'"
         else:
             return "Paste your HF access token here (hf_...)"
 
     def set_openai_key(self, openai_input: str):
         if not openai_input and self.has_secret_openai():
             st.session_state['openai_api_key'] = st.secrets['OPENAI_API_KEY']
-            st.info(body="Secret OpenAI API key!", icon="✔")
+            # st.info(body="Secret OpenAI API key!", icon="✔")
+            # st.toast(body="Secret OpenAI API key!", icon="✔")
         elif openai_input:
             if openai_input.startswith("sk-"):
                 st.session_state['openai_api_key'] = openai_input
@@ -65,7 +66,8 @@ class KeyStates:
     def set_hf_token(self, hf_input: str):
         if not hf_input and self.has_secret_hf_token():
             st.session_state['hf_access_token'] = st.secrets['HUGGING_FACE_TOKEN']
-            st.info(body="Secret HuggingFace Token!", icon="✔")
+            # st.info(body="Secret HuggingFace Token!", icon="✔")
+            # st.toast(body="Secret HuggingFace Token!", icon="✔")
         elif hf_input:
             if hf_input.startswith("hf_"):
                 st.session_state['hf_access_token'] = hf_input

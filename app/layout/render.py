@@ -1,5 +1,7 @@
 from layout.ui import STYLES_DIR, via_header, via_sidebar, coffee_btn, social_btns, waves
+from core.states import KeyStates
 import streamlit as st
+kS = KeyStates()
 
 def css_import():
     with open(STYLES_DIR / "global.css") as global_css, open(STYLES_DIR / "button.css") as btn_css, open(STYLES_DIR / "waves.css") as waves_css:
@@ -11,14 +13,10 @@ def set_header():
     st.markdown(via_header(), unsafe_allow_html=True)
 
 
-from core.states import KeyStates
-kS = KeyStates()
 def set_sidebar():
     with st.sidebar:
         st.markdown(via_sidebar(), unsafe_allow_html=True)
         st.markdown(social_btns(), unsafe_allow_html=True)
-        st.markdown(coffee_btn(), unsafe_allow_html=True)
-
         k0, k1 = st.columns([2, 2])
         openai_key_input = st.text_input(
                 label="OpenAI API Key:",
@@ -41,6 +39,8 @@ def set_sidebar():
         )
         with k1:
             kS.set_hf_token(hf_token_input)
+
+        st.markdown(coffee_btn(), unsafe_allow_html=True)
 
 
 def set_layout():
