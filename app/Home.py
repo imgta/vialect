@@ -117,7 +117,7 @@ if st.session_state.url_btn or st.session_state.upload_btn:
         st.session_state.audio = True
 
     if st.session_state.audio:
-        g2.audio(data=audio_file, format="audio/ogg")
+        g2.audio(data=audio_file)
         g2.caption(f"**Audio Extracted:** *:blue[{extract_time:.2f}s]*")
 
         diarize_dict = {}
