@@ -12,7 +12,7 @@ DATA_DIR.mkdir(exist_ok=True)
 MEDIA_BIN = DATA_DIR / "media"
 MEDIA_BIN.mkdir(exist_ok=True)
 
-def page_cfg(page_name="", layout="wide"):
+def page_cfg(page_name: str = "", layout: str = "wide") -> dict[str, str]:
     return {
         "page_title": f"{page_name}V/A.Lect",
         "page_icon": "🧪",
