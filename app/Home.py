@@ -62,8 +62,7 @@ video_url = g1.text_input(label="Enter a video URL:", placeholder="YouTube, Vime
 if video_url:
     if inP.url_change(video_url):
         url_btn = g1.button(label="Submit URL", on_click=inP.url_submit, use_container_width=True)
-else:
-    g1.empty()
+else: g1.empty()
 
 if st.session_state.url:
     st.session_state.url_btn = True
@@ -73,8 +72,7 @@ upload_file = g1.file_uploader(label="Upload video or audio:", type=['wav', 'mp3
 if upload_file and not st.session_state.url_btn:
     g1.empty()
     upload_btn = g1.button(label="Submit File", on_click=inP.upload_submit, use_container_width=True)
-else:
-    g1.empty()
+else: g1.empty()
 
 if st.session_state.upload:
     st.session_state.upload_btn = True
