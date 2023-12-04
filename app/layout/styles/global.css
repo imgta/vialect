@@ -1,8 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Alice&family=Annie+Use+Your+Telescope&family=Bruno+Ace+SC&family=Cute+Font&family=Italiana&family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&family=Julius+Sans+One&family=Libre+Barcode+128+Text&display=swap');
 
+[data-testid="column"] {margin-top: 0rem;}
+/* [data-baseweb="tab-list"] {margin-top: 0rem;} */
+[data-baseweb="tab-panel"] {padding-top: 0rem;}
+[data-baseweb="tab"] > div > p {font-weight: 600;}
 
 [data-testid="stSidebar"] {background-color:rgba(31, 32, 33, 0.705);}
-[data-testid="column"] {margin-top: 0rem;}
 [data-testid="stVerticalBlock"] {gap: 0.5rem; margin-top: 0.5rem;}
 [data-testid="stHorizontalBlock"] {flex-grow: 0;}
 
@@ -21,7 +24,15 @@
 
 [data-testid="stFileDropzoneInstructions"] > div > small {font-size: 0.75rem;}
 
+[data-testid="stExpander"] > details > summary {padding-bottom: 0.5rem;}
+
 /* section footer {visibility: hidden;} */
+
+hr {
+    border-bottom: 2px solid rgb(109, 63, 192);
+    margin-bottom: 0.5rem;
+    margin-top: 0;
+}
 
 div.heading-con, div.heading-side {
     display: flex;
@@ -32,6 +43,9 @@ div.heading-con, div.heading-side {
 div.heading-con {
     padding-left: 0.875rem;
     z-index: 20;
+}
+div.heading-side {
+    margin-top:0.3rem;
 }
 p.home-header {
     /* font-family: 'Annie Use Your Telescope', cursive; */
@@ -83,10 +97,4 @@ div.header-cuda p.vram {
 }
 div.header-cuda p span.cuda-info {
     color: rgb(61, 213, 109);
-}
-
-
-hr {
-    border-bottom: 2px solid rgb(109, 63, 192);
-    margin: 0;
 }
