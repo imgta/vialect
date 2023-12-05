@@ -6,7 +6,7 @@ class KeyStates:
     HUGGING_PREFIX = "hf_"
     WHISPER_DEFAULT_MODEL = "tiny"
     MODEL_OPTIONS = ['whisp','param0', 'param1', 'speed0', 'speed1']
-    PROCESS_STATES = ['english', 'translate', 'url', 'upload', 'attached', 'url_btn', 'upload_btn', 'processing', 'audio', 'diarize', 'rttm', 'transcript', 'openai_api_key', 'openai_updated', 'hf_access_token', 'hf_updated']
+    PROCESS_STATES = ['english', 'translate', 'url', 'upload', 'attached', 'url_btn', 'upload_btn', 'processing', 'audio', 'diarize', 'rttm', 'transcript', 'openai_api_key', 'openai_updated', 'hf_access_token', 'hf_updated', 'select_media', 'media_summary']
 
     def __init__(self, model_select):
         self.model_select = model_select

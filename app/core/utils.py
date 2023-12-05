@@ -62,19 +62,24 @@ class TaskUtility:
 
     @staticmethod
     def format_upload_date(date_str: str):
-        return datetime.strptime(date_str, "%Y%m%d").strftime("%B %d, %Y")
+        return datetime.strptime(date_str, "%Y%m%d").strftime("%b %d, %Y")
 
     @staticmethod
     def truncate_str(str, max_len):
         return (f"{str[:max_len]}...") if len(str) > max_len else str
 
 class Inputs:
-    """"[URL ADDRESS VALIDATION]"""
     @staticmethod
-    def url_change(url: str) -> bool:
+    def validate_url(url: str) -> bool:
         if not url.startswith(("http://", "https://")):
             url = "http://" + url
         return validators.url(url)
+
+    @staticmethod
+    def url_change():
+        """[EXTRACT URL INPUT] -> Resets any sidebar components (st_player, detail tabs) rendered from media selection."""
+        if 'select_media' in st.session_state and st.session_state['select_media']:
+            st.session_state['select_media'] = False
 
     @staticmethod
     def url_submit() -> None:

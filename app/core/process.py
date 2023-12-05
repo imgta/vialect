@@ -1,20 +1,21 @@
 from core.utils import TaskUtility
 from datetime import datetime
+from config import MEDIA_LIB
 from yt_dlp import YoutubeDL
 from typing import Optional
 from pathlib import Path
 import streamlit as st
 import subprocess
 import mimetypes
-import glob
+# import glob
 import time
 import json
 import os
 
 
 class AudioProcess:
-    SAVE_DIR = ".\\data\\media"
     tU = TaskUtility()
+
     @staticmethod
     def mono_resample(input_file_path: str) -> Optional[str]:
         """[RESAMPLING] -> Reduce audio to mono-channel, resample to 16kHz audio for downstream diarization. (.OGG or .mp3)"""
@@ -40,25 +41,27 @@ class AudioProcess:
                 yt_dict = ydl.extract_info(url=video_url, download=False)
 
             # Extract and save relevant video info in json
-            key_info = ['id', 'title', 'extractor_key', 'webpage_url', 'language', 'thumbnail', 'tags', 'categories', 'description', 'uploader', 'uploader_url', 'upload_date', 'view_count']
+            key_info = ['id', 'title', 'extractor_key', 'webpage_url', 'language', 'thumbnail', 'tags', 'categories', 'description', 'uploader', 'uploader_url','duration_string', 'upload_date', 'view_count']
             info_dict = {key: yt_dict.get(key, None) for key in key_info}
 
-            extract_date = datetime.now().strftime("%a, %b %d, %I:%M %p").replace(" 0", " ")
+            extract_date = datetime.now().strftime("%b %d, %Y %I:%M %p").replace(" 0", " ")
             info_dict['extract_date'] = extract_date
-            info_dict['upload_date'] = self.tU.format_upload_date(info_dict['upload_date'])
 
             for key in key_info:
                 if key in yt_dict:
                     info_dict[key] = yt_dict[key]
 
+            # Create media directory from video name
             video_title = self.tU.sanitize_name(info_dict.get('title', 'audio'))
-            MEDIA_PATH = Path(self.SAVE_DIR) / video_title
+            MEDIA_PATH = Path(MEDIA_LIB) / video_title
             os.makedirs(MEDIA_PATH, exist_ok=True)
+            info_dict['title_dir'] = video_title
 
             info_file = MEDIA_PATH / "info.json"
-            full_info = MEDIA_PATH / "full_info.json"
             with open(file=info_file, mode='w', encoding='utf-8') as inf:
                 json.dump(info_dict, inf, ensure_ascii=True)
+
+            full_info = MEDIA_PATH / "full_info.json"
             with open(file=full_info, mode='w', encoding='utf-8') as full:
                 json.dump(yt_dict, full, ensure_ascii=True)
 
@@ -189,33 +192,54 @@ class AudioTransform:
             'full_script': script,
         }
         transcripts.append(new_script)
+
         # Write updated transcripts back to transcript.json file
         with open(SCRIPT_PATH, 'w', encoding='utf-8') as f:
             json.dump(transcripts, f, ensure_ascii=True)
         return script, time.time() - start_time
 
 
-    def align_script(self, transcript: dict, rttm_data: list, tolerance: float = 1.5) -> tuple[list, float]:
+
+
+    def align_script(self, file_path: str, model_name: str, transcript: dict, rttm_data: list, tolerance: float = 1.5) -> tuple[list, float]:
         """[TRANSCRIPT ALIGNMENT] -> Synchronize, then align timestamps with speaker_ids + text
-        Note: Whisper's generated timestamps are often times inaccurate and differ from their Pyannote counterpart.
-        This is just a quick and dirty method of generating more accurate timestamps through comparisons, tempered by tolerance level."""
+        Note: Whisper's generated timestamps are often times inaccurate and differ from their Pyannote counterparts.
+        This is just a quick and dirty method of generating more accurate timestamps through segment comparisons and overlap detection, tempered by tolerance level."""
         exec_start = time.time()
-        sentences = []
+        STAMP_PATH = os.path.join(os.path.dirname(file_path), 'stamps.json')
+        stamps = [{'model': model_name}]
+
+        dialog = []
         for segment in transcript['segments']:
-            script_start = round(float(segment['start']), 2)
-            top_speaker = None
+            seg_start, seg_end = round(float(segment['start']), 2), round(float(segment['end']), 2)
 
             for speaker_id, start_time, duration in rttm_data:
-                rttm_start = round(float(start_time), 2)
-                rttm_end = round((float(start_time) + float(duration)), 2)
+                rttm_start, rttm_end = round(float(start_time), 2), round((float(start_time) + float(duration)), 2)
 
-                if rttm_start - tolerance <= script_start <= rttm_end + tolerance:
+                # Overlap detection between Whisper and Pyannote segments
+                if (rttm_start - tolerance <= seg_start <= rttm_end + tolerance) or (rttm_start - tolerance <= seg_end <= rttm_end + tolerance):
                     top_speaker = speaker_id
                     break
+
             if top_speaker is not None:
-                hms_time = self.tU.format_timestamp(script_start if abs(abs(script_start - rttm_start) - tolerance) > 0.5 else rttm_start)
-                sentences.append(f":gray[({hms_time})] **{top_speaker}**: {segment['text']}")
-        return sentences, time.time() - exec_start
+                hms_start = self.tU.format_timestamp(seg_start if abs(abs(seg_start - rttm_start) - tolerance) > 0.5 else rttm_start)
+                hms_end = self.tU.format_timestamp(seg_end if abs(abs(seg_end - rttm_end) - tolerance) > 0.5 else rttm_end)
+
+                dialog.append({
+                    'start': hms_start,
+                    'speaker': top_speaker,
+                    'text': segment['text'],
+                    'end': hms_end,
+                })
+
+        for entry in stamps:
+            if entry['model'] == model_name:
+                entry['timestamps'] = dialog
+
+        with open(STAMP_PATH, 'w', encoding='utf-8') as log:
+            json.dump(stamps, log, ensure_ascii=True)
+
+        return dialog, time.time() - exec_start
 
 
     def summarize(self,transcript_text: str, file_path: str, model_name: str) -> str:
@@ -228,12 +252,14 @@ class AudioTransform:
                 transcripts = json.load(script)
         except (FileNotFoundError, json.JSONDecodeError):
             transcripts = []
+
         # Check for existing summary generated for selected whisper model
         for entry in transcripts:
             if entry['model'] == model_name:
                 if 'summary' in entry and GPT_MODEL in entry['summary']:
                     return entry['summary'][GPT_MODEL]
 
+        # OpenAI ChatGPT client settings
         client = openai.OpenAI(api_key=st.session_state['openai_api_key'])
         context = "You are skilled in summarizing ideas/concepts from audio/video transcripts in JSON output: { 'summary': <summary here> }"
         response = client.chat.completions.create(
@@ -247,11 +273,13 @@ class AudioTransform:
         )
         json_res = response.choices[0].message.content
         summary = json.loads(json_res)['summary']
+        vial_date = datetime.now().strftime("%b %d, %Y %I:%M %p").replace(" 0", " ")
 
-        # Append generated summary to transcript
+        # Append generated summary and date to transcript
         for entry in transcripts:
             if entry['model'] == model_name:
                 entry['summary'] = {GPT_MODEL: summary}
+                entry['vial_date'] = vial_date
                 break
 
         with open(SCRIPT_PATH, 'w', encoding='utf-8') as f:
