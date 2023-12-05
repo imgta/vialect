@@ -41,27 +41,32 @@ class HTMLInterface:
         </div>
         """
 
-    @staticmethod
-    def via_sidebar():
+    def via_sidebar(self):
         return f"""
         <div class="heading-side">
             <p class="home-header">V<p><span class="header-i">|</span><p class="home-header">ALect</p>
             <span class="header-motto">
                 Streamlining your media intake,<br>
                 with speech-to-text summaries.<br>
-                Created by <a href="https://www.github.com/imgta">Gordon Ta</a>.
+                Created by <a href="https://www.github.com/imgta" data-replace="My GitHub" class="git-link"><span>Gordon Ta</span></a>.
             </span>
+            <div class="tip-container">
+                <a href="https://www.buymeacoffee.com/imgta" target="_blank">
+                    <img src="data:image/png;base64,{self.BTN_NORMAL}" class="normal-image" />
+                    <img src="data:image/png;base64,{self.BTN_HOVER}" class="hover-image" />
+                </a>
+            </div>
         </div>
         <hr>"""
 
-    def coffee_btn(self):
-        return f"""
-        <div class="tip-container">
-            <a href="https://www.buymeacoffee.com/imgta" target="_blank">
-                <img src="data:image/png;base64,{self.BTN_NORMAL}" class="normal-image" />
-                <img src="data:image/png;base64,{self.BTN_HOVER}" class="hover-image" />
-            </a>
-        </div>"""
+    # def coffee_btn(self):
+    #     return f"""
+    #     <div class="tip-container">
+    #         <a href="https://www.buymeacoffee.com/imgta" target="_blank">
+    #             <img src="data:image/png;base64,{self.BTN_NORMAL}" class="normal-image" />
+    #             <img src="data:image/png;base64,{self.BTN_HOVER}" class="hover-image" />
+    #         </a>
+    #     </div>"""
 
     @staticmethod
     def social_btns():

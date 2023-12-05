@@ -22,8 +22,8 @@ from layout.render import RenderUI
 render = RenderUI(key_states=kS)
 render.set_layout()
 
-tab0, tab1 = st.tabs(['Extract', 'Media'])
 ####################################################################################################
+tab0, tab1 = st.tabs(['EXTRACT', 'MEDIA'])
 with tab0:
     render.show_cuda()
     h0 = row([5, 3], vertical_align="bottom")
@@ -58,12 +58,18 @@ with tab0:
 
     g1 = grid([4,1], [4,1], [4,1], [4,1], vertical_align="bottom")
 
-    video_url = g1.text_input(label="Enter a video URL:", placeholder="YouTube, Vimeo, Dailymotion, etc.") if not st.session_state.upload_btn else g1.empty()
+    video_url = g1.text_input(label="Enter a video URL:",placeholder="YouTube, Vimeo, Dailymotion, etc.", on_change=inP.url_change) if not st.session_state.upload_btn else g1.empty()
 
-    if video_url and not st.session_state.upload:
-        if inP.url_change(video_url):
+    # Embed/display playable video in sidebar
+    if video_url and not st.session_state.upload and not st.session_state.get('select_media', False):
+        if inP.validate_url(video_url):
             st.session_state.url = True
-            with st.sidebar: st_player(url=video_url, height=250)
+            with st.sidebar:
+                st_player(
+                    url=video_url,
+                    key="extract_player",
+                    height=250
+                )
             url_btn = g1.button(label="Submit URL", on_click=inP.url_submit, use_container_width=True)
         else:
             g1.empty()
@@ -191,7 +197,7 @@ with tab0:
     if st.session_state.transcript:
         task_align = threading.Thread(
             target=tU.threaded_task,
-            args=(aT.align_script, [transcript, rttm_data, 1.5], align_dict),
+            args=(aT.align_script, [audio_file, select_model, transcript, rttm_data, 1.5], align_dict),
             )
         get_script_run_ctx(task_align)
         task_align.start()
@@ -204,10 +210,10 @@ with tab0:
         st.session_state.diarize = False
         st.session_state.transcript = False
 
-    with g2.expander(label="Aligned Transcript:"):
-        if dialogues != []:
-            for log in dialogues:
-                st.caption(f"{log}\n")
+    # with g2.expander(label="Aligned Transcript:"):
+    #     if dialogues != []:
+    #         for log in dialogues:
+    #             st.caption(f"{log}\n")
 
     if transcript != []:
         with g2.expander(label=f"Transcribed Text:"):
@@ -221,4 +227,4 @@ with tab0:
 ####################################################################################################
 from core.media import list_media
 with tab1:
-    list_media()
+    list_media(st.session_state['whisp'])
