@@ -28,7 +28,7 @@ $`\textcolor{gray}{\textit{for treasures unseen.}}`$
 > 🔊 **Text-to-Speech &rarr;** Have your generated summaries read back to you  
 > 📚 **Media Collection &rarr;** Locally store and navigate your transformed data  
 > 🚀 **Intuitive UI &rarr;** Seamless frontend layout via Streamlit  
-> >![vialect_ss](https://github.com/imgta/vialect/assets/126015138/bed7b8c4-2994-4a2f-82e4-ee2636194d22)
+> > ![vialect_ss](https://github.com/imgta/vialect/assets/126015138/bed7b8c4-2994-4a2f-82e4-ee2636194d22)  
 
 ## Setup:
 > [!IMPORTANT]
