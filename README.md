@@ -4,9 +4,10 @@
     <a href="https://github.com/imgta/vialect/search?l=python" target="_blank">
         <img src="https://img.shields.io/github/languages/top/imgta/vialect" alt="Top Language"/>
     </a>
-        <a href="https://github.com/imgta/vialect/commits/main" target="_blank">
+    <a href="https://github.com/imgta/vialect/commits/main" target="_blank">
         <img src="https://img.shields.io/github/last-commit/imgta/vialect" alt="Last Commit"/>
     </a>
+    <img alt="GitHub repo size" src="https://img.shields.io/github/repo-size/imgta/vialect?label=size&color=6d3fc0">
 </div>
 <p align="center"><strong><em>ViaLect</strong> streamlines your media intake by transforming audio into workable text and generated summaries!</em></p>
 <div align="center">
