@@ -6,8 +6,8 @@ class KeyStates:
     HUGGING_PREFIX = "hf_"
     WHISPER_DEFAULT_MODEL = "tiny"
     MODEL_OPTIONS = ['whisp','param0', 'param1', 'speed0', 'speed1']
-    PROCESS_STATES = ['english', 'translate', 'url', 'upload', 'attached', 'url_btn', 'upload_btn', 'processing', 'audio', 'diarize', 'rttm', 'transcript', 'openai_api_key', 'openai_updated', 'hf_access_token', 'hf_updated', 'select_media', 'media_summary']
-    MEDIA_STATES = ['select_audio_offset']
+    PROCESS_STATES = ['english', 'translate', 'url', 'upload', 'attached', 'url_btn', 'upload_btn', 'processing', 'audio', 'diarize', 'rttm', 'transcript', 'openai_api_key', 'openai_updated', 'hf_access_token', 'hf_updated']
+    MEDIA_STATES = ['select_audio_offset', 'select_media', 'media_summary', 'select_whisper']
 
     def __init__(self, model_select):
         self.model_select = model_select
@@ -40,6 +40,10 @@ class KeyStates:
             if state not in st.session_state:
                 if state == 'select_audio_offset':
                     st.session_state['select_audio_offset'] = 0
+                elif state == 'select_whisper':
+                    st.session_state['select_whisper'] = None
+                elif state in ['select_media', 'media_summary']:
+                    st.session_state[state] = False
 
     def _get_secret_key(self, key_name: str):
         key = st.secrets[key_name]

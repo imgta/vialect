@@ -298,7 +298,7 @@ class AudioTransform:
 
         # OpenAI ChatGPT client settings
         client = openai.OpenAI(api_key=st.session_state['openai_api_key'])
-        context = "You are skilled in summarizing ideas/concepts from audio/video transcripts in JSON output: { 'summary': <summary here> }"
+        context = "You are skilled in summarizing key ideas/concepts from audio/video transcripts in JSON output: { 'summary': <summary here> }"
         response = client.chat.completions.create(
             model=GPT_MODEL,
             response_format={ "type": "json_object" },
@@ -306,7 +306,11 @@ class AudioTransform:
                 {"role": "system", "content": context},
                 {"role": "user", "content": f"Summarize the following text:\n{transcript_text}"}
             ],
-            max_tokens=300,
+            temperature=0.2, # creativity, [0 -> 2]
+            max_tokens=300, # limits response length
+            # top_p=0.2, # vocabulary diversity, [0 -> 1]
+            # frequency_penalty=0.5, # penalizes repition, [0 -> 2]
+            # presence_penalty=0.5, # encourages new topics, [0 -> 2]
         )
         json_res = response.choices[0].message.content
         summary = json.loads(json_res)['summary']
@@ -323,3 +327,17 @@ class AudioTransform:
             json.dump(transcripts, f, ensure_ascii=True)
 
         return summary
+
+
+    def text2speech(self, text_input: str, output_dir, whisper_model: str):
+        OUTPUT_PATH = os.path.join(output_dir, f"{whisper_model}_tts.mp3")
+        TTS_MODEL = 'tts-1'
+        VOICE_MODEL = 'nova'
+
+        client = openai.OpenAI(api_key=st.session_state['openai_api_key'])
+        response = client.audio.speech.create(
+            model=TTS_MODEL,
+            voice=VOICE_MODEL,
+            input=text_input,
+        )
+        response.stream_to_file(OUTPUT_PATH)

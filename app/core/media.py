@@ -1,12 +1,15 @@
-from streamlit_player import st_player
-from core.utils import TaskUtility
 from layout.render import mark_newlines
+from streamlit_player import st_player
+from streamlit_extras.row import row
+from core.utils import TaskUtility
+from core.process import AudioTransform
 from config import MEDIA_LIB
 import streamlit as st
 import json
 import os
 
 tU = TaskUtility()
+audT = AudioTransform()
 
 priority_hash = {
         'large.en': 10, 'large': 9,
@@ -108,6 +111,7 @@ def set_media_lib():
 
     return st.session_state['select_media']
 
+
 def get_media_details(media_info):
     st.markdown(body=f"""
 <div class="details-con">
@@ -130,18 +134,29 @@ def get_media_details(media_info):
 </div>
 """, unsafe_allow_html=True)
 
-def get_transcript(select_media):
+
+def get_transcript(select_media, select_whisper=None):
     GPT_MODEL = 'gpt-3.5-turbo-1106'
     SCRIPT_PATH = os.path.join(MEDIA_LIB, select_media['title_dir'], 'transcript.json')
     if os.path.isfile(SCRIPT_PATH):
         with open(SCRIPT_PATH, 'r') as script:
-            media_script = json.load(script)
+            transcript = json.load(script)
 
+        # Fetch summary generated based text from selected whisper model
+        select_summary = None
+        if select_whisper:
+            for entry in transcript:
+                if entry.get('model') == select_whisper and entry.get('summary'):
+                    select_summary = entry['summary'][GPT_MODEL]
+
+            st.session_state['media_summary'] = select_summary
+            return st.session_state['media_summary'], transcript
+
+        # Else, fetch top summary based on prioritizing whisper model size
         top_summary = None
         top_priority = 0
         top_model = None
-
-        for entry in media_script:
+        for entry in transcript:
             model = entry.get('model')
 
             if model in priority_hash:
@@ -153,7 +168,8 @@ def get_transcript(select_media):
                     top_model = entry['model']
 
         st.session_state['media_summary'] = top_summary
-        return st.session_state['media_summary'], top_model
+
+        return st.session_state['media_summary'], transcript
     return None
 
 
@@ -165,7 +181,6 @@ def get_timestamps(select_media):
 
         top_timestamps = None
         top_priority = 0
-
         for entry in media_stamps:
             model = entry.get('model')
             if model in priority_hash:
@@ -177,12 +192,15 @@ def get_timestamps(select_media):
         return top_timestamps
     return None
 
+
 def list_media():
     selected = set_media_lib()
     if 'select_media' in st.session_state and st.session_state['select_media']:
-        AUDIO_PATH = os.path.join(MEDIA_LIB, selected['title_dir'], 'audio.OGG')
+        MEDIA_DIR = os.path.join(MEDIA_LIB, selected['title_dir'])
+        AUDIO_PATH = os.path.join(MEDIA_LIB, MEDIA_DIR, 'audio.OGG')
         timestamps = get_timestamps(selected)
-        summary, summary_whisp = get_transcript(selected)
+
+        summary, transcript = get_transcript(selected)
 
         # VIDEO AND AUDIO PLAYER
         with st.sidebar:
@@ -195,34 +213,52 @@ def list_media():
             if os.path.isfile(AUDIO_PATH):
                 st.audio(data=AUDIO_PATH, start_time=st.session_state['select_audio_offset'])
 
-        if 'media_summary' in st.session_state and st.session_state['media_summary']:
-            with st.sidebar:
-                m0, m1, m2 = st.tabs(['DETAILS', 'SUMMARY', 'TRANSCRIPT'])
 
-                with m0:
-                    get_media_details(selected)
+        with st.sidebar:
+            m0, m1, m2 = st.tabs(['DETAILS', 'SUMMARY', 'TRANSCRIPT'])
+
+            with m0:
+                get_media_details(selected)
+                mark_newlines(2)
+
+                # Consolidate/reduce double newlines for cleaner markdown format
+                clean_description = selected['description'].replace("\n\n ","\n")
+                st.caption(body=clean_description, unsafe_allow_html=True)
+
+            with m1:
+                m1L, m1R = st.columns([0.4, 0.6])
+                with m1L:
+                    whisper_list = get_whispers(transcript)
                     mark_newlines(2)
+                    whisper_box = st.selectbox(label="Whispers",options=whisper_list,label_visibility="collapsed", index=len(whisper_list)-1, key="whispered")
+                    if whisper_box:
+                        summary, _ = get_transcript(selected, whisper_box)
 
-                    # Consolidate/reduce double newlines for cleaner markdown format
-                    clean_description = selected['description'].replace("\n\n ","\n")
-                    st.caption(body=clean_description, unsafe_allow_html=True)
+                with m1R:
+                    mark_newlines(1)
+                    TTS_PATH = os.path.join(MEDIA_LIB, MEDIA_DIR, f"{whisper_box}_tts.mp3")
+                    if os.path.isfile(TTS_PATH):
+                        st.audio(data=TTS_PATH)
+                    else:
+                        mark_newlines(1)
+                        tts_btn = st.button(label="Text2Speech", key=f"tts-{st.session_state['select_media']}", use_container_width=True)
+                        if tts_btn:
+                            audT.text2speech(text_input=summary, output_dir=MEDIA_DIR, whisper_model=whisper_box)
 
-                with m1:
+                if 'media_summary' in st.session_state and st.session_state['media_summary']:
                     st.markdown(body=f"""
-                    <div class="detail-heading">Via whisper {summary_whisp} and GPT-3.5:</div>
-                    <div class="detail-subtle">{summary}</div>
-                """, unsafe_allow_html=True)
+                        <div class="detail-subtle">{summary}</div>
+                        """, unsafe_allow_html=True)
 
-                with m2:
-                    st.caption("Buttons seek to corresponding timestamps.")
+            with m2:
+                st.caption("Buttons seek to corresponding timestamps.")
 
-                    m2a, m2b = st.columns([1.5,4])
-                    for log in timestamps:
-                        with m2a:
-                            audio_offset =  st.button(label=f"▶ &nbsp;{log['start']}", key=f"play-{log['start']}")
-                            mark_newlines(1)
-                            if audio_offset != 0:
-                                st.session_state['select_audio_offset'] = tU.floor_timestamp_sec(log['start'])
-                                st.rerun()
-
-                        m2b.caption(body=f"{log['speaker']}: {log['text']}")
+                m2_L, m2_R = st.columns([0.24, 0.76])
+                for log in timestamps:
+                    with m2_L:
+                        audio_offset = st.button(label=f"▶ &nbsp;{log['start']}", key=f"play-{log['start']}")
+                        if audio_offset != 0:
+                            st.session_state['select_audio_offset'] = tU.floor_timestamp_sec(log['start'])
+                            st.rerun()
+                    with m2_R:
+                        st.caption(body=f"<{log['speaker']}>: {log['text']}")
