@@ -31,14 +31,18 @@ $`\textcolor{gray}{\textit{for treasures unseen.}}`$
 ![vialect_ss](https://github.com/imgta/vialect/assets/126015138/bed7b8c4-2994-4a2f-82e4-ee2636194d22)
 
 ## Setup:
-1. Install ffmpeg and requirements:
+1. Git clone this repository:
+```console
+git clone https://github.com/imgta/vialect.git
+```
+2. Install ffmpeg and requirements:
 ```console
 sudo apt install ffmpeg
 pip install -r requirements.txt
 ```
-2. Obtain Hugging Face [token/access](https://huggingface.co/pyannote/speaker-diarization-3.1), obtain [OpenAI API Key](https://platform.openai.com/api-keys)
-3. Create and update `.streamlit/secrets.toml` (example provided)
-4. Launch streamlit app:
+3. Obtain Hugging Face [token/access](https://huggingface.co/pyannote/speaker-diarization-3.1), obtain [OpenAI API Key](https://platform.openai.com/api-keys)
+4. Create and update `.streamlit/secrets.toml` (example provided)
+5. Launch streamlit app:
 ```console
 streamlit run app/Home.py
 ```
