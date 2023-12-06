@@ -7,6 +7,7 @@ class KeyStates:
     WHISPER_DEFAULT_MODEL = "tiny"
     MODEL_OPTIONS = ['whisp','param0', 'param1', 'speed0', 'speed1']
     PROCESS_STATES = ['english', 'translate', 'url', 'upload', 'attached', 'url_btn', 'upload_btn', 'processing', 'audio', 'diarize', 'rttm', 'transcript', 'openai_api_key', 'openai_updated', 'hf_access_token', 'hf_updated', 'select_media', 'media_summary']
+    MEDIA_STATES = ['select_audio_offset']
 
     def __init__(self, model_select):
         self.model_select = model_select
@@ -15,6 +16,7 @@ class KeyStates:
     def init_states(self):
         self._init_process_states()
         self._init_model_states()
+        self._init_media_states()
 
 
     def _init_model_states(self):
@@ -32,6 +34,12 @@ class KeyStates:
         for state in self.PROCESS_STATES:
             if state not in st.session_state:
                 st.session_state[state] = False
+
+    def _init_media_states(self):
+        for state in self.MEDIA_STATES:
+            if state not in st.session_state:
+                if state == 'select_audio_offset':
+                    st.session_state['select_audio_offset'] = 0
 
     def _get_secret_key(self, key_name: str):
         key = st.secrets[key_name]

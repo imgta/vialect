@@ -7,6 +7,7 @@ import base64
 import GPUtil
 import torch
 import time
+import math
 
 
 class TaskUtility:
@@ -41,11 +42,20 @@ class TaskUtility:
 
     @staticmethod
     def format_timestamp(seconds: float) -> str:
-        """[TIMESTAMP FORMATTING] -> Converts diarized speaker timestamps from seconds into a more readable min:sec:ms timestamp format."""
+        """[TIMESTAMP FORMATTING] -> Converts diarized speaker timestamps from seconds into a more readable MM:SS:ms timestamp format."""
         minute = int(seconds // 60)
         whole_sec = int(seconds)
         millisec = int((seconds - whole_sec) * 1000)
         return f"{minute:02d}:{whole_sec % 60:02d}:{millisec:03d}"
+
+    @staticmethod
+    def convert_to_seconds(timestamp):
+        minute, second, millisec = map(int, timestamp.split(':'))
+        return minute * 60 + second + millisec / 1000
+
+
+    def floor_timestamp_sec(self, seconds):
+        return math.floor(self.convert_to_seconds(seconds))
 
     @staticmethod
     def sanitize_name(title: str, max_length: int = 200) -> str:

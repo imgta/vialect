@@ -15,8 +15,8 @@
 
 [data-testid="stSidebarUserContent"] {padding-top:2rem;}
 [data-testid="stSidebar"] {background-color:rgba(31, 32, 33, 0.705);}
-[data-testid="stVerticalBlock"] {gap: 0.5rem; margin-top: 0.5rem;}
-[data-testid="stHorizontalBlock"] {flex-grow: 0;}
+[data-testid="stVerticalBlock"] {gap: 0.5rem; margin-top: 0rem;}
+[data-testid="stHorizontalBlock"] {flex-grow: 0; gap:0.75rem;}
 
 [data-testid="stAlert"] {display: flex; justify-content: center; align-items: center;}
 [data-testid="stNotificationContentInfo"] > div {gap: 0;}

@@ -18,7 +18,7 @@ from core.utils import TaskUtility, Inputs
 from core.process import AudioProcess, AudioTransform
 
 tU, inP, aP, aT = TaskUtility(), Inputs(), AudioProcess(), AudioTransform()
-from layout.render import RenderUI
+from layout.render import RenderUI, mark_newlines
 render = RenderUI(key_states=kS)
 render.set_layout()
 
@@ -26,9 +26,11 @@ render.set_layout()
 tab0, tab1 = st.tabs(['EXTRACT', 'MEDIA'])
 with tab0:
     render.show_cuda()
-    h0 = row([5, 3], vertical_align="bottom")
-    c0, c1, = h0.columns([6, 3])
-    c2, c3 = h0.columns([1, 1])
+
+    h0 = row([0.54, 0.46], vertical_align="bottom")
+    c0, c1, = h0.columns([0.6, 0.3])
+    c2, c3 = h0.columns([0.2, 0.4])
+
     whisper_model = c0.selectbox(
         label="Whisper model :gray[(min. VRAM)]:",
         options=mS.update_display(),
@@ -210,11 +212,6 @@ with tab0:
         st.session_state.diarize = False
         st.session_state.transcript = False
 
-    # with g2.expander(label="Aligned Transcript:"):
-    #     if dialogues != []:
-    #         for log in dialogues:
-    #             st.caption(f"{log}\n")
-
     if transcript != []:
         with g2.expander(label=f"Transcribed Text:"):
             st.text_area(label="Transcribed Text", value=transcript['text'].strip(), height=250, label_visibility="hidden")
@@ -227,4 +224,5 @@ with tab0:
 ####################################################################################################
 from core.media import list_media
 with tab1:
-    list_media(st.session_state['whisp'])
+    st.subheader(body="Media Collection", divider=False)
+    list_media()

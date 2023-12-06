@@ -130,7 +130,8 @@ class AudioTransform:
             try:
                 # Establish pipeline device usage
                 self.pipeline.to(self.devices)
-                diarization = self.pipeline(audio_path)
+                diarization = self.pipeline(audio_path, min_speakers=1, max_speakers=5)
+
                 with open(rttm_output, "w") as rttm:
                     diarization.write_rttm(rttm)
                 return rttm_output, time.time() - start_time
@@ -199,6 +200,30 @@ class AudioTransform:
         return script, time.time() - start_time
 
 
+    def merge_segments(self, dialog, tolerance: float = 0.0):
+        merged_dialog = []
+        prev_log = None
+
+        for log in dialog:
+            # Only merge when speaker_ids from both logs match
+            if prev_log and prev_log['speaker'] == log['speaker']:
+                prev_end = self.tU.convert_to_seconds(prev_log['end'])
+                current_start = self.tU.convert_to_seconds(log['start'])
+
+                # Find matching ending and starting time segments from previous and current logs, respectively
+                if abs(prev_end - current_start) <= tolerance:
+                    prev_log['text'] += f" {log['text'].strip()}"
+                    prev_log['end'] = log['end'] # Keep end time of current segment
+                    continue
+
+            if prev_log:
+                merged_dialog.append(prev_log)
+            prev_log = log.copy()
+
+        if prev_log:
+            merged_dialog.append(prev_log)
+
+        return merged_dialog
 
 
     def align_script(self, file_path: str, model_name: str, transcript: dict, rttm_data: list, tolerance: float = 1.5) -> tuple[list, float]:
@@ -207,14 +232,27 @@ class AudioTransform:
         This is just a quick and dirty method of generating more accurate timestamps through segment comparisons and overlap detection, tempered by tolerance level."""
         exec_start = time.time()
         STAMP_PATH = os.path.join(os.path.dirname(file_path), 'stamps.json')
-        stamps = [{'model': model_name}]
+
+        # Load existing or initialize new timestamps
+        try:
+            with open(STAMP_PATH, 'r', encoding='utf-8') as log:
+                stamps = json.load(log)
+        except (FileNotFoundError, json.JSONDecodeError):
+            stamps = []
+
+        # Check if timestamps exist for whisper model_name
+        for entry in stamps:
+            if entry['model'] == model_name:
+                if 'timestamps' in entry:
+                    return entry['timestamps'], time.time() - exec_start
+                break
 
         dialog = []
         for segment in transcript['segments']:
-            seg_start, seg_end = round(float(segment['start']), 2), round(float(segment['end']), 2)
+            seg_start, seg_end = round(float(segment['start']), 4), round(float(segment['end']), 4)
 
             for speaker_id, start_time, duration in rttm_data:
-                rttm_start, rttm_end = round(float(start_time), 2), round((float(start_time) + float(duration)), 2)
+                rttm_start, rttm_end = round(float(start_time), 4), round((float(start_time) + float(duration)), 4)
 
                 # Overlap detection between Whisper and Pyannote segments
                 if (rttm_start - tolerance <= seg_start <= rttm_end + tolerance) or (rttm_start - tolerance <= seg_end <= rttm_end + tolerance):
@@ -228,18 +266,17 @@ class AudioTransform:
                 dialog.append({
                     'start': hms_start,
                     'speaker': top_speaker,
-                    'text': segment['text'],
+                    'text': segment['text'].strip(),
                     'end': hms_end,
                 })
 
-        for entry in stamps:
-            if entry['model'] == model_name:
-                entry['timestamps'] = dialog
-
+        # Append and save new timestamp data in stamps.json
+        merged_dialog = self.merge_segments(dialog, 0)
+        stamps.append({'model': model_name, 'timestamps': merged_dialog})
         with open(STAMP_PATH, 'w', encoding='utf-8') as log:
             json.dump(stamps, log, ensure_ascii=True)
 
-        return dialog, time.time() - exec_start
+        return merged_dialog, time.time() - exec_start
 
 
     def summarize(self,transcript_text: str, file_path: str, model_name: str) -> str:

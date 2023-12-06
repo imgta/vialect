@@ -2,7 +2,8 @@ div.tab-con {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-top: 0rem;
+    vertical-align: top;
+    margin-top: 0;
 }
 .tabs {
     width: 90px;
