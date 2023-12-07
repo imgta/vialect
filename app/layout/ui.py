@@ -44,7 +44,9 @@ class HTMLInterface:
     def via_sidebar(self):
         return f"""
         <div class="heading-side">
-            <p class="home-header">V<p><span class="header-i">|</span><p class="home-header">ALect</p>
+        <a href="/" class="home-header-link" target="_self">
+            <p class="home-header">V</p><span class="header-i">|</span><p class="home-header">ALect</p>
+        </a>
             <span class="header-motto">
                 Streamlining your media intake,<br>
                 with speech-to-text summaries.<br>
