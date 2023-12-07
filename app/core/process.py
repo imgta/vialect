@@ -307,7 +307,7 @@ class AudioTransform:
                 {"role": "user", "content": f"Summarize the following text:\n{transcript_text}"}
             ],
             temperature=0.2, # creativity, [0 -> 2]
-            max_tokens=300, # limits response length
+            max_tokens=250, # limits response length
             # top_p=0.2, # vocabulary diversity, [0 -> 1]
             # frequency_penalty=0.5, # penalizes repition, [0 -> 2]
             # presence_penalty=0.5, # encourages new topics, [0 -> 2]

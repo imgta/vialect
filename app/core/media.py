@@ -244,6 +244,7 @@ def list_media():
                         tts_btn = st.button(label="Text2Speech", key=f"tts-{st.session_state['select_media']}", use_container_width=True)
                         if tts_btn:
                             audT.text2speech(text_input=summary, output_dir=MEDIA_DIR, whisper_model=whisper_box)
+                            st.rerun()
 
                 if 'media_summary' in st.session_state and st.session_state['media_summary']:
                     st.markdown(body=f"""

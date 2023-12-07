@@ -100,7 +100,7 @@ hr {
     margin-top: 0;
 }
 
-div.heading-con, div.heading-side {
+div.heading-con, div.heading-side, .home-header-link {
     display: flex;
     height: 75px;
     flex-wrap: nowrap;
@@ -133,6 +133,11 @@ span.header-i {
     margin: 0 -0.5rem 0 -0.125rem;
     line-height: 4.825rem;
 }
+
+a.home-header-link {
+    color:rgba(250, 250, 250, 1);
+}
+
 span.header-motto {
     font-family: 'JetBrains', monospace;
     color: #ffffff80;
