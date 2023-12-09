@@ -91,9 +91,6 @@ span a.git-link:hover span {
     transform: translate3d(-200%, 0, 0);
 }
 
-
-/* section footer {visibility: hidden;} */
-
 hr {
     border-bottom: 2px solid rgb(109, 63, 192);
     margin-bottom: 0.5rem;
@@ -115,11 +112,6 @@ div.heading-side {
 }
 
 p.home-header {
-    /* font-family: 'Annie Use Your Telescope', cursive; */
-    /* font-family: 'Julius Sans One'; */
-    /* font-family: 'Bruno Ace SC'; */
-    /* font-family: 'Cute Font'; */
-    /* font-family: 'Italiana'; */
     font-family: 'Libre Barcode 128 Text';
     letter-spacing: -2px;
     font-size: 3rem;
